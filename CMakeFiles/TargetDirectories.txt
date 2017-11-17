@@ -1,0 +1,3 @@
+/home/yichun/Desktop/cvProject/CMakeFiles/rebuild_cache.dir
+/home/yichun/Desktop/cvProject/CMakeFiles/edit_cache.dir
+/home/yichun/Desktop/cvProject/CMakeFiles/pj1.dir
