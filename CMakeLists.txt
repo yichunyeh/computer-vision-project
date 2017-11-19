@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8)
-project( cvProject )
+project( computer-vision-project )
 find_package( OpenCV REQUIRED )
 include_directories( ${OpenCV_INCLUDE_DIRS} )
 add_executable( pj1 pj1.cpp )

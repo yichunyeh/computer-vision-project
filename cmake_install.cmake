@@ -1,4 +1,4 @@
-# Install script for directory: /home/yichun/Desktop/cvProject
+# Install script for directory: /home/yichun/Desktop/computer-vision-project
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -40,5 +40,5 @@ endif()
 
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
-file(WRITE "/home/yichun/Desktop/cvProject/${CMAKE_INSTALL_MANIFEST}"
+file(WRITE "/home/yichun/Desktop/computer-vision-project/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")

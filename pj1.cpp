@@ -13,19 +13,21 @@ using namespace std;
 class find_parallelograms{
     private:
         Mat angles; //Angle map
-        int img_w;  //image width
+	int img_w;  //image width
         int img_h;  //image height
 	unsigned int* accu;   //accumulator
         int accu_w; //accumulator width
         int accu_h; //accumulator height
 
     public:
+	Mat image;
         Mat gray(Mat); //Grayscale
         vector<vector<double> > createFilter(int, int, double); //Creates a gaussian filter
         Mat useFilter(Mat, vector<vector<double> >); //Use gaussian filter
         Mat sobel(Mat); //Sobel filtering
         Mat nonMaxSupp(Mat); //Non-maxima supp.
 	Mat threshold(Mat, int, int); //Double threshold and finalize picture
+	void PrintLines(int, int);
 	int HoughTransform(unsigned char*, int, int);
         //int HoughTransform(Mat, int, int);
 	vector< pair< pair<int, int>, pair<int, int> > > GetLines(int);
@@ -273,17 +275,108 @@ int find_parallelograms::HoughTransform(unsigned char* img_data, int w, int h){
      }  
      return 0;  
 }
+void find_parallelograms::PrintLines(int t, int r){
+	vector< pair< pair<int, int>, pair<int, int> > > tmp;
+	int x1, y1, x2, y2;  
+	x1 = y1 = x2 = y2 = 0;  
+			
+	if(t >= 45 && t <= 135){  
+	    //y = (r - xcos(t)) / sin(t)  
+	    x1 = 0;  
+	    //y1 = ((double)(r-(accu_h/2)) - ((x1-(img_w/2))*cos(t*PI/180.0))) / sin(t*PI/180.0) + (img_h/2);  
+	    y1 = ((double)(r-(accu_h/2)) - ((x1-(img_w/2))*cos(t*DEG2RAD))) / sin(t*DEG2RAD) + (img_h/2); 
+	    x2 = img_w - 0;  
+	    y2 = ((double)(r-(accu_h/2)) - ((x2-(img_w/2))*cos(t*DEG2RAD))) / sin(t*DEG2RAD) + (img_h/2);  
+	    //y1 = y1>y2 ? y1:y2;
+	    //for(int i=x1; i<x2; i++){
+		//for(int j=y1; j<y2; j++){
+		   //accu[]
+		//}
+	    //}
+	}  
+	else{  
+	    //x = (r - y sin(t)) / cos(t);  
+	    y1 = 0;  
+	    x1 = ((double)(r-(accu_h/2)) - ((y1-(img_h/2))*sin(t*DEG2RAD))) / cos(t*DEG2RAD)+(img_w/2);  
+	    y2 = img_h - 0;  
+	    x2 = ((double)(r-(accu_h/2)) - ((y2-(img_h/2))*sin(t*DEG2RAD))) / cos(t*DEG2RAD)+(img_w/2);  
+	} 
+     
+	line(image, Point(x1, y1), Point(x2, y2), Scalar(0, 225, 0), 5, 8);
+
+	//determine the paralle lines here
+	//tmp.push_back(pair< pair<int, int>, pair<int, int> >(pair<int, int>(x1,y1), pair<int, int>(x2,y2))); 
+	//para_lines[accu_w] = pair< pair<int, int>, pair<int, int> >(pair<int, int>(x1,y1), pair<int, int>(x2,y2));
+	//return tmp;
+}
+
+//void find_parallelograms::PrintShape(int t, int r, ){
+//	vector< pair< pair<int, int>, pair<int, int> > > tmp;
+//	int x1, y1, x2, y2;  
+//	x1 = y1 = x2 = y2 = 0;  
+//			
+//	if(t >= 45 && t <= 135){  
+//	    //y = (r - xcos(t)) / sin(t)  
+//	    x1 = 0;  
+//	    //y1 = ((double)(r-(accu_h/2)) - ((x1-(img_w/2))*cos(t*PI/180.0))) / sin(t*PI/180.0) + (img_h/2);  
+//	    y1 = ((double)(r-(accu_h/2)) - ((x1-(img_w/2))*cos(t*DEG2RAD))) / sin(t*DEG2RAD) + (img_h/2); 
+//	    x2 = img_w - 0;  
+//	    y2 = ((double)(r-(accu_h/2)) - ((x2-(img_w/2))*cos(t*DEG2RAD))) / sin(t*DEG2RAD) + (img_h/2);  
+//	    //y1 = y1>y2 ? y1:y2;
+//	    //for(int i=x1; i<x2; i++){
+//		//for(int j=y1; j<y2; j++){
+//		   //accu[]
+//		//}
+//	    //}
+//	}  
+//	else{  
+//	    //x = (r - y sin(t)) / cos(t);  
+//	    y1 = 0;  
+//	    x1 = ((double)(r-(accu_h/2)) - ((y1-(img_h/2))*sin(t*DEG2RAD))) / cos(t*DEG2RAD)+(img_w/2);  
+//	    y2 = img_h - 0;  
+//	    x2 = ((double)(r-(accu_h/2)) - ((y2-(img_h/2))*sin(t*DEG2RAD))) / cos(t*DEG2RAD)+(img_w/2);  
+//	} 
+//     
+//	line(image, Point(x1, y1), Point(x2, y2), Scalar(0, 225, 0), 5, 8);
+//
+//	//determine the paralle lines here
+//	//tmp.push_back(pair< pair<int, int>, pair<int, int> >(pair<int, int>(x1,y1), pair<int, int>(x2,y2))); 
+//	//para_lines[accu_w] = pair< pair<int, int>, pair<int, int> >(pair<int, int>(x1,y1), pair<int, int>(x2,y2));
+//	//return tmp;
+//}
 
 vector< pair< pair<int, int>, pair<int, int> > > find_parallelograms::GetLines(int threshold){  
-    vector< pair< pair<int, int>, pair<int, int> > > lines;  
+    vector<int> lines;
+    //vector< pair< pair<int, int>, pair<int, int> > > lines;
+    lines.push_back(0);
+    lines.resize(0);
+
+    vector< pair<int, vector<int> > >  para_lines;
+    //vector<vector< pair< pair<int, int>, pair<int, int> > > > para_lines;  //To store the parallel lines.
+
+    vector< pair< pair<int, int>, pair<int, int> > > shape_lines; //To store the lines of the shape.
+
+    //accu_point = (unsigned int*)calloc(img_h*img_w, sizeof(unsigned int));  
+
     //vector< int, vector< pair<int, int>, pair<int, int> > paralle;
     if(accu == 0)  
-        return lines;  
+        return shape_lines;  
+    //int cnt; //To count the parallel line.
+    for(int t=0; t<accu_w; t++){  
+	//cnt = 0; //Initialize the counter to 0 when move to another degree.
+	//para_lines[accu_w] = pair< pair<int, int>, pair<int, int> >(pair<int, int>(x1,y1), pair<int, int>(x2,y2));
 
-    for(int r=0; r<accu_h; r++){  
-        for(int t=0; t<accu_w; t++){  
+	//!!!make sure to chage the print initial value!!!! since I initial the first one to (-1,-1)
+	//lines.push_back(pair< pair<int, int>, pair<int, int> >(pair<int, int>(-1,-1), pair<int, int>(-1,-1)));
+        
+        //need to check other places!
+	//lines.push_back(-1);
+
+	//cout << "initial: " << lines[0] << endl;
+        for(int r=0; r<accu_h; r++){  
             if((int)accu[(r*accu_w) + t] >= threshold){  
-                //Is this point a local maxima (9x9)  
+                //cnt++;
+		//Is this point a local maxima (9x9)  
                 int max = accu[(r*accu_w) + t];  
                 for(int ly=-4; ly<=4; ly++){  
                     for(int lx=-4; lx<=4; lx++){  
@@ -297,37 +390,161 @@ vector< pair< pair<int, int>, pair<int, int> > > find_parallelograms::GetLines(i
                 }  
                 if(max > (int)accu[(r*accu_w) + t])  
                     continue;  
-                int x1, y1, x2, y2;  
-                x1 = y1 = x2 = y2 = 0;  
-
-                if(t >= 45 && t <= 135){  
-                    ////y = (r - xcos(t))/sin(t)  
-                    x1 = 0;  
-                    //y1 = ((double)(r-(accu_h/2)) - ((x1-(img_w/2))*cos(t*PI/180.0))) / sin(t*PI/180.0) + (img_h/2);  
-		    y1 = ((double)(r-(accu_h/2)) - ((x1-(img_w/2))*cos(t*DEG2RAD))) / sin(t*DEG2RAD) + (img_h/2); 
-                    x2 = img_w - 0;  
-                    y2 = ((double)(r-(accu_h/2)) - ((x2-(img_w/2))*cos(t*DEG2RAD))) / sin(t*DEG2RAD) + (img_h/2);  
-                }  
-                else{  
-                    //x = (r - y sin(t)) / cos(t);  
-                    y1 = 0;  
-                    x1 = ((double)(r-(accu_h/2)) - ((y1-(img_h/2))*sin(t*DEG2RAD))) / cos(t*DEG2RAD)+(img_w/2);  
-                    y2 = img_h - 0;  
-                    x2 = ((double)(r-(accu_h/2)) - ((y2-(img_h/2))*sin(t*DEG2RAD))) / cos(t*DEG2RAD)+(img_w/2);  
-                } 
-                //slope = (y1-y2) / (x1-x2);                 
+		//if(cnt % 2 == 0)
+		    //continue;
+                
+		//int value = lines.begin();
+		//cout << "before push_back r: " << lines[t] << endl;
+		lines.push_back(r);
+	        //cout << "after push_back r: " << lines[t] << " And r is: " << r << endl;
+                //lines.push_back(pair< pair<int, int>, pair<int, int> >(pair<int, int>(x1,y1), pair<int, int>(x2,y2)));  
 		
-    
-                lines.push_back(pair< pair<int, int>, pair<int, int> >(pair<int, int>(x1,y1), pair<int, int>(x2,y2)));  
-   
-            }  
-        }  
-    }  
+            } 
+        } 
+	vector<int>::iterator itL;
+	cout << "lines' size: " << lines.size() << endl;
+	cout << "R's at angle: " << t << " is: ";
+	for(itL=lines.begin(); itL!=lines.end(); itL++){
+	    cout << *itL << " ";
+	}
+	cout << endl;
+	//fine tune here: put some different but similar degree together
+	if(t%10!=0){
+	    if(t==179){
+	        para_lines.push_back(pair<int, vector <int> >(t, vector <int> (lines)));
+		cout << "t=179!" << endl;
+	        cout << "size of line " << t << ":" << para_lines.size() << endl;
+		lines.resize(0);
+	    }
+	    continue;
+	    //vector<int> para_lines_tmp(-1);
+	    //para_lines.push_back(
+	}
+        para_lines.push_back(pair<int, vector <int> >(t, vector <int> (lines)));
+	cout << "size of line " << t << ":" << para_lines.size() << endl;
+	lines.resize(0);
+	//cout << "size of line " << t << "(after resize):" << lines.size() << endl;
 
-    cout << "lines: " << lines.size() << " " << threshold << endl;  
-    return lines;  
+    }
+    cout << "push finish." << endl;
+
+    //check if it has pair
+    vector< pair <int, vector <int> > > final_para_lines;
+    for(int i=0; i<para_lines.size(); i++){
+        if(para_lines.at(i).second.size()>=2)
+	    final_para_lines.push_back(para_lines.at(i));
+    }
+
+    vector< pair <int, vector <int> > >::iterator L;
+    //cout << "lines' size: " << lines.size() << endl;
+    //cout << "Points in final_para_lines: " << i << " is: ";
+    cout << "Number of lines in final_para_lines: " << final_para_lines.size() << endl;
+    for(L=final_para_lines.begin(); L!=final_para_lines.end(); L++){
+	PrintLines(L->first, L->second.at(0));
+	PrintLines(L->first, L->second.at(1));
+        cout << "angle: " << L->first << "  first r: " << L->second.at(0) << " second r: " << L->second.at(1);
+	cout << endl;
+    }	
+    cout << endl;
+
+    
+    
+    vector< vector <int> >::iterator t;
+    //vector< pair< pair<int, int>, pair<int, int> > >::iterator t; 
+    int inter_x1; //first intersection coordinates x
+    int inter_y1; //first intersection coordinates y
+    //int inter_x2; //second intersection coordinates x
+    //int inter_y2; //second intersection coordinates y
+    int d1, d2, r1, r2;
+    d1 = d2 = r1 = r2 = 0;
+
+    vector< pair <int, int> > points;
+
+    //for(int i=0; i<accu_w; i++){ //or we can use vector.size()
+    for(int i=0; i<final_para_lines.size(); i++){ //need to check here!
+        //cout << "accu_w" << i << endl;
+        //cout << "point1: " << Point(para_lines.at(i).back().first.first, para_lines.at(i).back().first.second) << " point2:" << Point(para_lines.at(i).back().second.first, para_lines.at(i).back().second.second) << endl;
+	//if(para_lines.at(i).back().first.first ==(-1) && para_lines.at(i).back().first.second==(-1) && para_lines.at(i).back().second.first ==(-1) && para_lines.at(i).back().second.second ==(-1))
+	cout<<"size of final_para_lines.at: "<< i << " is: " << final_para_lines.at(i).second.size() << endl;
+	//this part later can skip
+	//if(para_lines.at(i).size()<3)
+	//    continue;
+ 	//if(para_lines.at(i).size()>=3){  //(need to add one because I add one more line for initializing the vector
+	//    cout << "larger than3" << endl;
+	//    //bool tmp = para_lines.at(i).size() >= 3 ? true:
+	//    if(para_lines.at(i+90).size() >= 3){
+	//	//cout << "prara_line.at(i).size(): " << para_lines.at(i).size() << " para_lines.at(i+90).size(): " << para_lines.at(i+90).size() <<endl;
+	for(int j=0; j<final_para_lines.size(); j++){
+		//put points into lines
+		points.resize(0);
+		for(int a=0; a<final_para_lines.at(i).second.size(); a++){
+		    for(int b=0; b<final_para_lines.at(j).second.size(); b++){
+			if(final_para_lines.at(i).first!=final_para_lines.at(j).first){
+				cout << "Now is for line: " << i << " and line: " << j <<endl;
+				cout <<"Intersection point: " << a << " and intersection point: " << b << endl;
+				d1 = final_para_lines.at(i).first;
+				d2 = final_para_lines.at(j).first;
+				cout << "d1(before): " << d1 << " d2(before): " << d2 << endl;
+				//d1 = final_para_lines.at(i).first*DEG2RAD;
+				//d2 = final_para_lines.at(j).first*DEG2RAD;
+				//r1 = final_para_lines.at(i).second.at(a)-(accu_h/2);
+				//r2 = final_para_lines.at(j).second.at(b)-(accu_h/2);
+				r1 = (double)final_para_lines.at(i).second.at(a);
+				r2 = (double)final_para_lines.at(j).second.at(b);
+				cout << "d1: " << d1 << " d2: " << d2 << " r1: " << r1 << " r2: " << r2 << endl;
+				//find the intersection points
+				//y1
+				//x1 = ((double)(r-(accu_h/2)) - ((y1-(img_h/2))*sin(t*DEG2RAD))) / cos(t*DEG2RAD)+(img_w/2);
+				inter_x1 = (cos(d2)*r1-cos(d1)*r2) / (sin(d1)*cos(d2)-cos(d1)*sin(d2));
+				inter_y1 = (r1-inter_y1*sin(d1)) / cos(d1);
+				//inter_x1 = (double)(sin(d1)*r2-sin(d2)*r1) / (sin(d1)*cos(d2)-sin(d2)*cos(d1))+img_h/2;
+				//inter_y1 = (double)(cos(d1)*r2-cos(d2)*r1) / (cos(d1)*sin(d2)-sin(d1)*cos(d2))+img_w/2;
+				points.push_back(pair<int, int>(inter_x1, inter_y1));
+				vector< pair <int, int> >::iterator itP;
+				//cout << "lines' size: " << itP.size() << endl;
+				cout << "Points in final_para_lines: " << i << " is: " << endl;
+				for(itP=points.begin(); itP!=points.end(); itP++){
+				    cout << "point " << itP->first << " " << itP->second;
+				    cout << endl;
+				}
+				cout << endl;
+				if(points.size()==2){
+				    shape_lines.push_back(pair< pair<int, int>, pair<int, int> >(points.at(0), points.at(1)));
+				    points.resize(0);
+				}
+			}
+			//inter_x2 = (cos(i)*para_lines[i+90][b+1]-cos(i+90)*para_lines[i][a]) / (cos(i)*sin(i+90)-sin(i)*cos(i+90)); 
+			//inter_y2 = (cos(i)*para_lines[i+90][b+1]-sin(i+90)*para_lines[i][a]) / (cos(i+90)*sin(i)-sin(i+90)*cos(i));
+			//shape_lines.push_back(pair< pair<int, int>, pair<int, int> >(pair<int, int>(inter_x1,inter_y1), pair<int, int>(inter_x2,inter_y2)));
+			//inter_point.push_back(); 
+		    }
+		    //shape_lines.push_back(pair< pair<int, int>, pair<int, int> >(pair<int, int>(x1,y1), pair<int, int>(x2,y2)));
+	        }
+	  //  }
+	}    	    
+	    //cout << "create iterator!" << endl;
+	    //cout << "Parallel lines in theta: " << i << endl;
+	    //cout << "size of the para_lines: " << para_lines.at(i).size() << endl;
+	    //t=para_lines.at(i).begin();
+	    ////for(it=lines.begin(); it!=lines.end(); it++){  
+	    //for(advance(t, 1); t!=para_lines.at(i).end(); t++){
+	        ////here need to modify! since I change vector<pair...> to vector<vector<int> >	
+	        //cout << "point1: " << Point(t->first.first, t->first.second) << " point2:" << Point(t->second.first, t->second.second) << endl; 
+	        ////line(image, Point(it->first.first, it->first.second), Point(it->second.first, it->second.second), Scalar(0, 0, 255), 5, 8);
+	    //}      
+
+        //para_lines[accu_w]
+	//cout << "Parallel lines in theta: " << accu_w << endl;
+	//cout << "point1: " << Point(it->first.first, it->first.second) << " point2:" << Point(it->second.first, it->second.second) << endl; 
+
+	 
+    }
+
+    cout << "shape_lines' size: " << shape_lines.size() << "  threshold: " << threshold << endl;  
+    return shape_lines;  
 } 
-  
+
+//We don't use this function right now.
 const unsigned int* find_parallelograms::GetAccu(int *w, int *h)
 {
     *w = accu_w;
@@ -340,22 +557,22 @@ int main(int argc, char** argv)
 {
     //char* imageName = argv[1];
     int num;
-    Mat image;
+    //Mat image;
     find_parallelograms fp;
     cout << "Using image(1,2 or3):";
     cin >> num;
 
     if(num==1)
-    	image = imread("TestImage1c.jpg", 1);
+    	fp.image = imread("TestImage1c.jpg", 1);
     else if(num==2)
-	 image = imread("TestImage2c.jpg", 1);
+        fp.image = imread("TestImage2c.jpg", 1);
     else if(num==3)
-	 image = imread("TestImage3.jpg", 1);
+	fp.image = imread("TestImage3.jpg", 1);
 
     //imwrite("Gray_Image.jpg", gray_image);
 
-    Mat gray_image = fp.gray(image);
-    //create Gaussian Filter 
+    Mat gray_image = fp.gray(fp.image);
+    //create Gaussian Filter
     vector<vector<double> > filter = fp.createFilter(3, 3, 1);
     Mat gFiltered = fp.useFilter(gray_image, filter); //use Gaussian Filter
     Mat sobel_image = fp.sobel(gray_image);
@@ -366,7 +583,7 @@ int main(int argc, char** argv)
  
     namedWindow("window1", CV_WINDOW_AUTOSIZE);
     moveWindow("window1", 20, 20); 
-    imshow("window1", image);
+    imshow("window1", fp.image);
     waitKey(0);
     imshow("window1", gray_image);
     waitKey(0);
@@ -388,7 +605,7 @@ int main(int argc, char** argv)
     else if(num==2)
         line_thres = 130;
     else if(num==3)
-        line_thres = 300;
+        line_thres = 40;
     vector< pair< pair<int, int>, pair<int, int> > > lines = fp.GetLines(line_thres);  
  
     //Draw the results  
@@ -397,7 +614,7 @@ int main(int argc, char** argv)
 	cout << "point1: " << Point(it->first.first, it->first.second) << " point2:" << Point(it->second.first, it->second.second) << endl; 
 	//line(image, Point(0,0), Point(700, 500), Scalar(0, 0, 255), 10, 8);
 
-        line(image, Point(it->first.first, it->first.second), Point(it->second.first, it->second.second), Scalar(0, 0, 255), 5, 8);
+        line(fp.image, Point(it->first.first, it->first.second), Point(it->second.first, it->second.second), Scalar(0, 0, 255), 5, 8);
     }
 
     //char c = waitKey(360000);
@@ -428,7 +645,7 @@ int main(int argc, char** argv)
 //        img_accu.data[(p*3)+2] = 255-c;  
 //    }
 //    imshow("window1", img_accu);
-    imshow("window1", image);
+    imshow("window1", fp.image);
 
 
     waitKey(0);
